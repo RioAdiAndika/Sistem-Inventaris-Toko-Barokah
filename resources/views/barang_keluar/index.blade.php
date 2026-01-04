@@ -2,27 +2,45 @@
 
 @section('content')
 <div class="container">
-    <h4 class="mb-3">Barang Keluar</h4>
 
-    <a href="{{ route('barang-keluar.create') }}" class="btn btn-danger mb-3">
-        + Barang Keluar
-    </a>
+    <div class="d-flex justify-content-between mb-3">
+        <h4>📦 Data Barang Keluar</h4>
+        <a href="{{ route('barang-keluar.create') }}" class="btn btn-danger">
+            + Barang Keluar
+        </a>
+    </div>
 
-    <table class="table table-bordered">
-        <tr>
-            <th>No</th>
-            <th>Barang</th>
-            <th>Jumlah</th>
-            <th>Tanggal</th>
-        </tr>
-        @foreach($data as $item)
-        <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $item->product->nama_barang }}</td>
-            <td>{{ $item->jumlah }}</td>
-            <td>{{ $item->tanggal }}</td>
-        </tr>
-        @endforeach
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    <table class="table table-bordered align-middle">
+        <thead class="table-light text-center">
+            <tr>
+                <th>No</th>
+                <th>Barang</th>
+                <th>Jumlah</th>
+                <th>Tanggal Keluar</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @forelse($data as $item)
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td>{{ $item->product->nama_barang }}</td>
+                    <td class="text-center">{{ $item->jumlah }}</td>
+                    <td class="text-center">{{ $item->tanggal_format }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        Data barang keluar belum tersedia
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
     </table>
+
 </div>
 @endsection

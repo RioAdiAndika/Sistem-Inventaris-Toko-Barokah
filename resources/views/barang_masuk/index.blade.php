@@ -13,18 +13,33 @@
             <th>No</th>
             <th>Barang</th>
             <th>Jumlah</th>
+            <th>Tanggal Kadaluarsa</th>
             <th>Tanggal</th>
+            <th>Status Expired</th>
         </tr>
     </thead>
-    <tbody>
-        @foreach ($data as $item)
-        <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $item->product->nama_barang }}</td>
-            <td>{{ $item->jumlah }}</td>
-            <td>{{ $item->tanggal }}</td>
-        </tr>
-        @endforeach
-    </tbody>
+   <tbody>
+@forelse ($data as $item)
+    <tr class="{{ $item->row_class }}">
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ $item->product->nama_barang }}</td>
+        <td>{{ $item->jumlah }}</td>
+        <td>{{ $item->tanggal_kadaluarsa_format }}</td>
+        <td>{{ $item->tanggal_format }}</td>
+        <td>
+            <span class="badge bg-{{ $item->badge }}">
+                {{ $item->status_expired }}
+            </span>
+        </td>
+
+    </tr>
+@empty
+    <tr>
+        <td colspan="6" class="text-center text-muted">
+            Belum ada data barang masuk
+        </td>
+    </tr>
+@endforelse
+</tbody>
 </table>
 @endsection

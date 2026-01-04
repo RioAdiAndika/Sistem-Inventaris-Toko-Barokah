@@ -54,4 +54,11 @@ Route::middleware(['auth', 'role:Admin|Gudang'])->group(function () {
         ->only(['index', 'create', 'store']);
 });
 
+Route::get('/batch-by-product/{id}', function ($id) {
+    return \App\Models\BarangMasuk::where('product_id', $id)
+        ->orderBy('tanggal_kadaluarsa')
+        ->get();
+});
+
+
 

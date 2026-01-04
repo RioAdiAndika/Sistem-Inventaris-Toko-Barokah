@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<h4 class="mb-3">➕ Tambah Barang Masuk</h4>
+<h4 class="mb-3"> Tambah Barang Masuk</h4>
 
 <form action="{{ route('barang-masuk.store') }}" method="POST">
     @csrf
@@ -24,8 +24,14 @@
     </div>
 
     <div class="mb-3">
-        <label>Tanggal</label>
-        <input type="date" name="tanggal" class="form-control" required>
+        <label>Tanggal Kadaluarsa</label>
+        <input type="date" name="tanggal_kadaluarsa" class="form-control">
+    </div>
+
+    <div class="mb-3">
+            <label>Tanggal Masuk</label>
+            <input type="date" name="tanggal" class="form-control"
+                   value="{{ date('Y-m-d') }}" required>
     </div>
 
     <button class="btn btn-success">Simpan</button>
