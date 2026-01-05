@@ -6,16 +6,22 @@
 <div class="card mb-3 p-3">
     <form method="GET" class="row g-3 align-items-center">
         <div class="col-auto">
-            <input type="text" name="search" class="form-control" placeholder="Cari nama produk..." value="{{ request('search') }}">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Cari nama produk..."
+                   value="{{ request('search') }}">
         </div>
+
         <div class="col-auto">
             <select name="kategori" class="form-select">
                 <option value="">-- Semua Kategori --</option>
                 @foreach ($kategoriOptions as $k)
-                    <option value="{{ $k }}" {{ request('kategori') == $k ? 'selected' : '' }}>{{ $k }}</option>
+                    <option value="{{ $k }}" {{ request('kategori') == $k ? 'selected' : '' }}>
+                        {{ $k }}
+                    </option>
                 @endforeach
             </select>
         </div>
+
         <div class="col-auto">
             <button class="btn btn-primary">Filter</button>
             <a href="{{ route('products.katalog') }}" class="btn btn-secondary">Reset</a>
@@ -32,26 +38,41 @@
             <th>Nama</th>
             <th>Kategori</th>
             <th>Stok</th>
+            <th class="text-center">Aksi</th>
         </tr>
     </thead>
+
     <tbody>
         @forelse ($products as $p)
         <tr>
             <td>{{ $p->kode_barang }}</td>
+
             <td>
                 @if ($p->gambar)
-                    <img src="{{ asset('storage/products/'.$p->gambar) }}" width="80" alt="{{ $p->nama_barang }}">
+                    <img src="{{ asset('storage/products/'.$p->gambar) }}"
+                         width="80" alt="{{ $p->nama_barang }}">
                 @else
                     <span class="text-muted">-</span>
                 @endif
             </td>
+
             <td>{{ $p->nama_barang }}</td>
             <td>{{ $p->kategori }}</td>
-            <td>{{ $p->stok }}</td>
+            <td class="fw-bold">{{ $p->stok }}</td>
+
+            {{-- 🔥 TOMBOL LIHAT KADALUARSA --}}
+            <td class="text-center">
+                <a href="{{ route('products.expired', $p->id) }}"
+                   class="btn btn-sm btn-outline-danger">
+                    Lihat Kadaluarsa
+                </a>
+            </td>
         </tr>
         @empty
         <tr>
-            <td colspan="5" class="text-center text-muted">Tidak ada produk</td>
+            <td colspan="6" class="text-center text-muted">
+                Tidak ada produk
+            </td>
         </tr>
         @endforelse
     </tbody>

@@ -31,6 +31,7 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.exportCsv');
     Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
+
 });
 
 /*
@@ -40,7 +41,6 @@ Route::middleware(['auth', 'role:Gudang'])->group(function () {
     Route::get('/dashboard-gudang', function () {
         return view('gudang.dashboard-gudang');
     })->name('dashboard.gudang');
-    Route::get('/katalog', [ProductController::class, 'katalog'])->name('products.katalog');
 });
 
 
@@ -52,13 +52,8 @@ Route::middleware(['auth', 'role:Admin|Gudang'])->group(function () {
         ->only(['index', 'create', 'store']);
     Route::resource('barang-keluar', BarangKeluarController::class)
         ->only(['index', 'create', 'store']);
+    Route::get('/katalog', [ProductController::class, 'katalog'])->name('products.katalog');
+    Route::get('products/{id}/expired', [ProductController::class, 'expired'])->name('products.expired');
 });
-
-Route::get('/batch-by-product/{id}', function ($id) {
-    return \App\Models\BarangMasuk::where('product_id', $id)
-        ->orderBy('tanggal_kadaluarsa')
-        ->get();
-});
-
 
 

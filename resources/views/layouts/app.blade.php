@@ -67,8 +67,14 @@
         </li>
         <li class="nav-item">
             <a href="{{ route('products.index') }}"
-               class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-               <i class="bi bi-box-seam"></i> Produk
+            class="nav-link {{ request()->routeIs('products.index') ? 'active' : '' }}">
+            <i class="bi bi-box-seam"></i> Daftar Produk
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('products.katalog') }}"
+            class="nav-link {{ request()->routeIs('products.katalog') ? 'active' : '' }}">
+            <i class="bi bi-box-seam"></i> Katalog
             </a>
         </li>
         <li class="nav-item">

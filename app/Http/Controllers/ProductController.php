@@ -7,6 +7,8 @@ use App\Models\BarangMasuk;
 use App\Models\BarangKeluar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 
 class ProductController extends Controller
 {
@@ -151,4 +153,64 @@ class ProductController extends Controller
             'Lain-lain'
         ];
     }
+public function expired($id)
+{
+    $product = Product::findOrFail($id);
+
+    $stock_per_exp = DB::table('barang_masuk as bm')
+        ->leftJoin('barang_keluar as bk', 'bm.id', '=', 'bk.barang_masuk_id')
+        ->where('bm.product_id', $id)
+        ->select(
+            'bm.tanggal_kadaluarsa',
+            DB::raw('bm.jumlah - COALESCE(SUM(bk.jumlah), 0) as total_stok')
+        )
+        ->groupBy(
+            'bm.id',
+            'bm.tanggal_kadaluarsa',
+            'bm.jumlah'
+        )
+        ->orderBy('bm.tanggal_kadaluarsa', 'asc')
+        ->get();
+
+    return view('products.expired', [
+        'product' => $product,
+        'stock_per_exp' => $stock_per_exp
+    ]);
+}
+public function katalog(Request $request)
+{
+    $query = Product::query();
+
+    // 🔍 Search nama produk
+    if ($request->filled('search')) {
+        $query->where('nama_barang', 'like', '%' . $request->search . '%');
+    }
+
+    // 🗂️ Filter kategori
+    if ($request->filled('kategori')) {
+        $query->where('kategori', $request->kategori);
+    }
+
+    $products = $query
+        ->orderBy('nama_barang')
+        ->get()
+        ->map(function ($product) {
+
+            // Hitung stok dinamis
+            $totalMasuk = BarangMasuk::where('product_id', $product->id)->sum('jumlah');
+            $totalKeluar = BarangKeluar::where('product_id', $product->id)->sum('jumlah');
+
+            $product->stok = $totalMasuk - $totalKeluar;
+
+            return $product;
+        });
+
+    // Ambil kategori statis
+    $kategoriOptions = $this->kategoriOptions();
+
+    return view('products.katalog', compact('products', 'kategoriOptions'));
+}
+
+
+
 }

@@ -60,25 +60,19 @@ class BarangMasukController extends Controller
         return view('barang_masuk.create', compact('products'));
     }
 
-   // Controller
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'product_id' => 'required|exists:products,id',
-        'jumlah' => 'required|integer|min:1',
-        'tanggal' => 'required|date',
-        'tanggal_kadaluarsa' => 'nullable|date|after_or_equal:tanggal',
-    ]);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal' => 'required|date',
+            'tanggal_kadaluarsa' => 'nullable|date|after_or_equal:tanggal',
+        ]);
 
-    // Simpan barang masuk
-    $barangMasuk = BarangMasuk::create($validated);
+        BarangMasuk::create($validated);
 
-    // 🔥 Tambahkan stok ke product
-    $barangMasuk->product->increment('stok', $validated['jumlah']);
-
-    return redirect()
-        ->route('barang-masuk.index')
-        ->with('success', 'Barang masuk berhasil dicatat');
-}
-
+        return redirect()
+            ->route('barang-masuk.index')
+            ->with('success', 'Barang masuk berhasil dicatat');
+    }
 }
