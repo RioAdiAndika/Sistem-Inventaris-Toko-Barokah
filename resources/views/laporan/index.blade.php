@@ -26,9 +26,10 @@
 
 {{-- Tombol Export --}}
 <div class="mb-3">
-    <a href="{{ route('laporan.exportCsv') }}" class="btn btn-success">Export CSV</a>
-    <a href="{{ route('laporan.exportPdf') }}" class="btn btn-danger">Download PDF</a>
+    <a href="{{ route('laporan.exportCsv', request()->query()) }}" class="btn btn-success">Export CSV</a>
+    <a href="{{ route('laporan.exportPdf', request()->query()) }}" class="btn btn-danger">Download PDF</a>
 </div>
+
 
 {{-- Tabel Semua Produk --}}
 <div class="card mb-4">
