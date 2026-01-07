@@ -20,6 +20,7 @@
                 <th>No</th>
                 <th>Barang</th>
                 <th>Jumlah</th>
+                <th>Satuan</th>
                 <th>Tanggal Keluar</th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td>{{ $item->product->nama_barang }}</td>
                     <td class="text-center">{{ $item->jumlah }}</td>
+                    <td class="text-center">{{ $item->satuan }}</td>
                     <td class="text-center">{{ $item->tanggal_format }}</td>
                 </tr>
             @empty

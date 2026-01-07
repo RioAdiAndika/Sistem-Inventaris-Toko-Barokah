@@ -34,27 +34,25 @@ class DashboardController extends Controller
         $warningDays = 90; // 3 bulan
 
         $barangExpired = BarangMasuk::whereNotNull('tanggal_kadaluarsa')
-            ->whereDate('tanggal_kadaluarsa', '<', $today)
+            ->whereDate('tanggal_kadaluarsa', '<=', $today)
             ->count();
 
         $barangHampirExpired = BarangMasuk::whereNotNull('tanggal_kadaluarsa')
-            ->whereDate('tanggal_kadaluarsa', '>=', $today)
-            ->whereDate('tanggal_kadaluarsa', '<=', $today->copy()->addDays($warningDays))
+            ->whereDate('tanggal_kadaluarsa', '>', $today)
+            ->whereDate('tanggal_kadaluarsa', '<', $today->copy()->addDays($warningDays))
             ->count();
 
-        // =====================
-        // AKTIVITAS TERBARU
-        // =====================
         $aktivitas = collect([
-            ...BarangMasuk::with('product')->latest()->take(3)->get()->map(fn ($x) => [
+            ...BarangMasuk::with('product')->latest()->take(3)->get()->map(fn($x) => [
                 'text' => "Barang masuk: {$x->product->nama_barang}",
-                'tanggal' => $x->tanggal
+                'tanggal' => $x->created_at
             ]),
-            ...BarangKeluar::with('product')->latest()->take(3)->get()->map(fn ($x) => [
+            ...BarangKeluar::with('product')->latest()->take(3)->get()->map(fn($x) => [
                 'text' => "Barang keluar: {$x->product->nama_barang}",
-                'tanggal' => $x->tanggal
+                'tanggal' => $x->created_at
             ]),
         ])->sortByDesc('tanggal')->take(5);
+
 
         // =====================
         // STOK KRITIS DETAIL
@@ -65,6 +63,28 @@ class DashboardController extends Controller
              <= stok_minimal'
         )->get();
 
+        // =====================
+        // DETAIL BARANG EXPIRED
+        // =====================
+        $expiredItems = BarangMasuk::with('product')
+            ->whereNotNull('tanggal_kadaluarsa')
+            ->whereDate('tanggal_kadaluarsa', '<=', $today)
+            ->orderBy('tanggal_kadaluarsa')
+            ->take(5)
+            ->get();
+
+        // =====================
+        // DETAIL HAMPIR EXPIRED
+        // =====================
+        $hampirExpiredItems = BarangMasuk::with('product')
+            ->whereNotNull('tanggal_kadaluarsa')
+            ->whereDate('tanggal_kadaluarsa', '>', $today)
+            ->whereDate('tanggal_kadaluarsa', '<=', $today->copy()->addDays($warningDays))
+            ->orderBy('tanggal_kadaluarsa')
+            ->take(5)
+            ->get();
+
+
         return view('admin.dashboard-admin', compact(
             'totalBarang',
             'totalMasuk',
@@ -73,7 +93,9 @@ class DashboardController extends Controller
             'barangHampirExpired',
             'barangExpired',
             'aktivitas',
-            'stokKritis'
+            'stokKritis',
+            'hampirExpiredItems',
+            'expiredItems',
         ));
     }
 }

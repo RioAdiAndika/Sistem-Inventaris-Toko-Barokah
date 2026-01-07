@@ -12,6 +12,7 @@ class BarangKeluar extends Model
         'product_id',
         'barang_masuk_id',
         'jumlah',
+        'satuan',
         'tanggal',
     ];
 

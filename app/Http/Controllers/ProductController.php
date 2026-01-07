@@ -157,26 +157,34 @@ public function expired($id)
 {
     $product = Product::findOrFail($id);
 
-    $stock_per_exp = DB::table('barang_masuk as bm')
-        ->leftJoin('barang_keluar as bk', 'bm.id', '=', 'bk.barang_masuk_id')
-        ->where('bm.product_id', $id)
-        ->select(
-            'bm.tanggal_kadaluarsa',
-            DB::raw('bm.jumlah - COALESCE(SUM(bk.jumlah), 0) as total_stok')
-        )
-        ->groupBy(
-            'bm.id',
-            'bm.tanggal_kadaluarsa',
-            'bm.jumlah'
-        )
-        ->orderBy('bm.tanggal_kadaluarsa', 'asc')
-        ->get();
+    $stock_per_exp = BarangMasuk::where('product_id', $product->id)
+    ->with('barangKeluar')
+    ->get()
+    ->groupBy(function ($item) {
+        return ($item->tanggal_kadaluarsa ?? 'null') . '|' . $item->satuan;
+    })
+    ->map(function ($group) {
 
-    return view('products.expired', [
-        'product' => $product,
-        'stock_per_exp' => $stock_per_exp
-    ]);
+        $totalMasuk = $group->sum('jumlah');
+
+        $totalKeluar = $group->sum(function ($item) {
+            return $item->barangKeluar->sum('jumlah');
+        });
+
+        $sisa = $totalMasuk - $totalKeluar;
+
+        return (object) [
+            'tanggal_kadaluarsa' => $group->first()->tanggal_kadaluarsa,
+            'satuan'             => $group->first()->satuan,
+            'total_stok'         => $sisa,
+        ];
+    })
+    ->filter(fn($item) => $item->total_stok > 0)
+    ->values();
+
+    return view('products.expired', compact('product', 'stock_per_exp'));
 }
+
 public function katalog(Request $request)
 {
     $query = Product::query();

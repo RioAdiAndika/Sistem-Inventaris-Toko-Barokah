@@ -60,19 +60,36 @@ class BarangMasukController extends Controller
         return view('barang_masuk.create', compact('products'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'jumlah' => 'required|integer|min:1',
-            'tanggal' => 'required|date',
-            'tanggal_kadaluarsa' => 'nullable|date|after_or_equal:tanggal',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required',
+        'jumlah'     => 'required|integer|min:1',
+        'satuan'     => 'required',
+        'tanggal'    => 'required|date',
+        'tanggal_kadaluarsa' => 'nullable|date',
+    ]);
 
-        BarangMasuk::create($validated);
-
-        return redirect()
-            ->route('barang-masuk.index')
-            ->with('success', 'Barang masuk berhasil dicatat');
+    // 🔴 CEK TANGGAL KADALUARSA
+    if ($request->tanggal_kadaluarsa) {
+        if (Carbon::parse($request->tanggal_kadaluarsa)->lt(Carbon::today())) {
+            return back()
+                ->withInput()
+                ->with('error', 'Tanggal kadaluarsa sudah lewat dari hari ini');
+        }
     }
+
+    BarangMasuk::create([
+        'product_id'         => $request->product_id,
+        'jumlah'             => $request->jumlah,
+        'satuan'             => $request->satuan,
+        'tanggal_kadaluarsa' => $request->tanggal_kadaluarsa,
+        'tanggal'            => $request->tanggal,
+    ]);
+
+    return redirect()
+        ->route('barang-masuk.index')
+        ->with('success', 'Barang berhasil ditambahkan');
+}
+
 }

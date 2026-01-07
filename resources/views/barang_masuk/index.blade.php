@@ -13,6 +13,7 @@
             <th>No</th>
             <th>Barang</th>
             <th>Jumlah</th>
+            <th>Satuan</th>
             <th>Tanggal Kadaluarsa</th>
             <th>Tanggal</th>
             <th>Status Expired</th>
@@ -24,6 +25,7 @@
         <td>{{ $loop->iteration }}</td>
         <td>{{ $item->product->nama_barang }}</td>
         <td>{{ $item->jumlah }}</td>
+        <td>{{ $item->satuan }}</td>
         <td>{{ $item->tanggal_kadaluarsa_format }}</td>
         <td>{{ $item->tanggal_format }}</td>
         <td>
