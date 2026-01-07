@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BarangKeluarController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ExpiredController;
+use App\Http\Controllers\DashboardGudangController;
 
 /*
 | AUTH
@@ -30,12 +31,6 @@ Route::get('/', function () {
 Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/dashboard-admin', [DashboardController::class, 'admin'])
         ->name('dashboard.admin');
-    Route::get('/expired/hampir', [ExpiredController::class, 'hampir'])
-        ->name('expired.hampir');
-
-    Route::get('/expired/sudah', [ExpiredController::class, 'sudah'])
-        ->name('expired.sudah');
-
     Route::resource('products', ProductController::class);
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.exportCsv');
@@ -46,16 +41,20 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
 | GUDANG
 */
 Route::middleware(['auth', 'role:Gudang'])->group(function () {
-    Route::get('/dashboard-gudang', function () {
-        return view('gudang.dashboard-gudang');
-    })->name('dashboard.gudang');
+    Route::get('/dashboard-gudang', [DashboardGudangController::class, 'index'])
+        ->name('dashboard.gudang');
 });
+
 
 
 /*
 | ADMIN & GUDANG
 */
 Route::middleware(['auth', 'role:Admin|Gudang'])->group(function () {
+    Route::get('/expired/hampir', [ExpiredController::class, 'hampir'])
+        ->name('expired.hampir');
+    Route::get('/expired/sudah', [ExpiredController::class, 'sudah'])
+        ->name('expired.sudah');
     Route::resource('barang-masuk', BarangMasukController::class)
         ->only(['index', 'create', 'store']);
     Route::resource('barang-keluar', BarangKeluarController::class)
