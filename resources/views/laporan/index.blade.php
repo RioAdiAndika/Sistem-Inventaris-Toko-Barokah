@@ -30,7 +30,6 @@
     <a href="{{ route('laporan.exportPdf', request()->query()) }}" class="btn btn-danger">Download PDF</a>
 </div>
 
-
 {{-- Tabel Semua Produk --}}
 <div class="card mb-4">
     <div class="card-header bg-light">Semua Produk</div>
@@ -42,7 +41,7 @@
                     <th>Gambar</th>
                     <th>Nama Barang</th>
                     <th>Kategori</th>
-                    <th>Stok</th>
+                    <th>Stok / Satuan</th>
                     <th>Stok Minimal</th>
                 </tr>
             </thead>
@@ -59,7 +58,11 @@
                         </td>
                         <td>{{ $p->nama_barang }}</td>
                         <td>{{ $p->kategori }}</td>
-                        <td>{{ $p->stok }}</td>
+                        <td>
+                            @foreach($p->stok_detail as $sd)
+                                {{ $sd['stok'] }} {{ $sd['satuan'] }}<br>
+                            @endforeach
+                        </td>
                         <td>{{ $p->stok_minimal }}</td>
                     </tr>
                 @empty
@@ -74,13 +77,13 @@
 
 {{-- Barang Masuk Terbanyak --}}
 <div class="card mb-4">
-    <div class="card-header bg-light">Barang Masuk Terbanyak (Bulan ini)</div>
+    <div class="card-header bg-light">Barang Masuk Terbanyak (Top 5)</div>
     <div class="card-body table-responsive">
         <table class="table table-bordered">
             <thead class="table-light">
                 <tr>
                     <th>Nama Barang</th>
-                    <th>Kategori</th>
+                    <th>Satuan</th>
                     <th>Total Masuk</th>
                 </tr>
             </thead>
@@ -88,7 +91,7 @@
                 @forelse($barangMasukTerbanyak as $bm)
                     <tr>
                         <td>{{ $bm->product->nama_barang }}</td>
-                        <td>{{ $bm->product->kategori }}</td>
+                        <td>{{ $bm->satuan->nama }}</td>
                         <td>{{ $bm->total_masuk }}</td>
                     </tr>
                 @empty
@@ -109,7 +112,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Nama Barang</th>
-                    <th>Kategori</th>
+                    <th>Satuan</th>
                     <th>Total Keluar</th>
                 </tr>
             </thead>
@@ -117,7 +120,7 @@
                 @forelse($barangKeluarTerbanyak as $bk)
                     <tr>
                         <td>{{ $bk->product->nama_barang }}</td>
-                        <td>{{ $bk->product->kategori }}</td>
+                        <td>{{ $bk->satuan->nama }}</td>
                         <td>{{ $bk->total_keluar }}</td>
                     </tr>
                 @empty
@@ -129,5 +132,6 @@
         </table>
     </div>
 </div>
+
 
 @endsection
