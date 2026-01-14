@@ -25,6 +25,11 @@ class Product extends Model
     {
         return $this->hasMany(BarangKeluar::class);
     }
+    public function satuans()
+{
+    return $this->belongsToMany(Satuan::class, 'product_satuan');
+
+}
 
     // ✅ stok otomatis
     public function getStokAttribute()

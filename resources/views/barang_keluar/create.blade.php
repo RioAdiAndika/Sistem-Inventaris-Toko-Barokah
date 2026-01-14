@@ -2,60 +2,46 @@
 
 @section('content')
 <div class="container">
-    <h4 class="mb-3">Tambah Barang Keluar</h4>
+    <h4 class="mb-3">📤 Tambah Barang Keluar</h4>
 
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <form action="{{ route('barang-keluar.store') }}" method="POST">
         @csrf
 
-        {{-- BARANG --}}
         <div class="mb-3">
             <label>Barang</label>
-            <select name="product_id" id="product_id" class="form-select" required>
+            <select id="product_id" name="product_id" class="form-select" required>
                 <option value="">-- Pilih Barang --</option>
-                @foreach ($products as $product)
-                    <option value="{{ $product->id }}">
-                        {{ $product->nama_barang }}
-                    </option>
+                @foreach ($products as $p)
+                    <option value="{{ $p->id }}">{{ $p->nama_barang }}</option>
                 @endforeach
             </select>
         </div>
 
-        {{-- TANGGAL KADALUARSA --}}
         <div class="mb-3">
-            <label>Tanggal Kadaluarsa</label>
-            <select id="tanggal_kadaluarsa" class="form-select" required>
+            <label>Tanggal Kadaluarsa (Batch)</label>
+            <select id="barang_masuk_id" name="barang_masuk_id" class="form-select" required>
                 <option value="">-- Pilih Barang Terlebih Dahulu --</option>
             </select>
         </div>
 
-        {{-- HIDDEN BARANG MASUK --}}
-        <input type="hidden" name="barang_masuk_id" id="barang_masuk_id">
+        {{-- HIDDEN SATUAN --}}
+        <input type="hidden" name="satuan_id" id="satuan_id">
 
-        {{-- JUMLAH --}}
         <div class="mb-3">
-            <label>Jumlah</label>
+            <label>Jumlah Keluar</label>
             <input type="number" name="jumlah" class="form-control" min="1" required>
         </div>
 
-        {{-- SATUAN --}}
-        <div class="mb-3">
-            <label>Satuan</label>
-            <select name="satuan" id="satuan" class="form-select" required>
-                <option value="">-- Pilih Satuan --</option>
-                <option value="Dus">Dus</option>
-                <option value="Slop">Slop</option>
-                <option value="Karung">Karung</option>
-                <option value="Pack">Pack</option>
-                <option value="Botol">Botol</option>
-                <option value="Pcs">Pcs</option>
-            </select>
-        </div>
-
-        {{-- TANGGAL KELUAR --}}
         <div class="mb-3">
             <label>Tanggal Keluar</label>
             <input type="date" name="tanggal" class="form-control"
@@ -67,39 +53,44 @@
     </form>
 </div>
 
-{{-- SCRIPT --}}
 <script>
-    const stockPerExp = @json($stock_per_exp);
+const productSelect = document.getElementById('product_id');
+const batchSelect   = document.getElementById('barang_masuk_id');
+const satuanInput   = document.getElementById('satuan_id');
 
-    document.getElementById('product_id').addEventListener('change', function () {
-        const expSelect = document.getElementById('tanggal_kadaluarsa');
-        expSelect.innerHTML = '<option value="">-- Pilih Tanggal Kadaluarsa --</option>';
+productSelect.addEventListener('change', function () {
+    const productId = this.value;
+    batchSelect.innerHTML = '<option>Loading...</option>';
 
-        if (stockPerExp[this.value]) {
+    if (!productId) {
+        batchSelect.innerHTML = '<option>-- Pilih Produk --</option>';
+        return;
+    }
 
-            // 🔥 SORT TANGGAL KADALUARSA TERDEKAT
-            const sorted = stockPerExp[this.value].sort((a, b) => {
-                if (!a.tanggal_kadaluarsa) return 1;
-                if (!b.tanggal_kadaluarsa) return -1;
-                return new Date(a.tanggal_kadaluarsa) - new Date(b.tanggal_kadaluarsa);
-            });
+    fetch(`/barang-keluar/batch/${productId}`)
+        .then(res => res.json())
+        .then(data => {
+            batchSelect.innerHTML = '<option value="">-- Pilih Kadaluarsa --</option>';
 
-            sorted.forEach(item => {
+            if (data.length === 0) {
+                batchSelect.innerHTML = '<option>Stok kosong</option>';
+                return;
+            }
+
+            data.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = item.barang_masuk_id;
-                opt.dataset.satuan = item.satuan;
-                opt.text =
-                    (item.tanggal_kadaluarsa ?? 'Tanpa Exp') +
-                    ' (Stok: ' + item.total_stok + ' ' + item.satuan + ')';
-                expSelect.appendChild(opt);
+                opt.value = item.id;
+                opt.dataset.satuan = item.satuan_id;
+                opt.textContent =
+                    `${item.tanggal_kadaluarsa} | Stok: ${item.stok} ${item.satuan}`;
+                batchSelect.appendChild(opt);
             });
-        }
-    });
+        });
+});
 
-    document.getElementById('tanggal_kadaluarsa').addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        document.getElementById('barang_masuk_id').value = selected.value;
-        document.getElementById('satuan').value = selected.dataset.satuan || '';
-    });
+batchSelect.addEventListener('change', function () {
+    const selected = this.selectedOptions[0];
+    satuanInput.value = selected.dataset.satuan || '';
+});
 </script>
 @endsection

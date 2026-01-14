@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('barang_keluar', function (Blueprint $table) {
-    $table->string('satuan', 50)->after('jumlah');
-});
-
+        Schema::create('satuans', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama'); // dus, bal, slop, pcs, dll
+            $table->timestamps();
+        });
     }
 
     /**
@@ -22,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('barang_keluar', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('satuans');
     }
 };

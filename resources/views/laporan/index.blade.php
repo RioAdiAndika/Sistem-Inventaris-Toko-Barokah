@@ -74,7 +74,7 @@
 
 {{-- Barang Masuk Terbanyak --}}
 <div class="card mb-4">
-    <div class="card-header bg-light">Barang Masuk Terbanyak (Top 5)</div>
+    <div class="card-header bg-light">Barang Masuk Terbanyak (Bulan ini)</div>
     <div class="card-body table-responsive">
         <table class="table table-bordered">
             <thead class="table-light">

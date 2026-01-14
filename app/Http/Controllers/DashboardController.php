@@ -11,60 +11,67 @@ class DashboardController extends Controller
 {
     public function admin()
     {
+        $today = Carbon::today();
+        $warningDays = 90;
+
         // =====================
         // STATISTIK UTAMA
         // =====================
         $totalBarang = Product::count();
-        $totalMasuk  = BarangMasuk::sum('jumlah');
-        $totalKeluar = BarangKeluar::sum('jumlah');
+
+        // 🔥 BARANG MASUK HARI INI
+        $barangMasukHariIni = BarangMasuk::whereDate('tanggal', $today)->sum('jumlah');
+
+        // BARANG KELUAR HARI INI
+        $barangKeluarHariIni = BarangKeluar::whereDate('tanggal', $today)->sum('jumlah');
 
         // =====================
         // STOK MENIPIS
         // =====================
         $stokMenipis = Product::whereRaw(
-            '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id) -
-             (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
-             <= stok_minimal'
+            '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id)
+           - (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
+           <= stok_minimal'
         )->count();
 
         // =====================
-        // HITUNG EXPIRED
+        // EXPIRED
         // =====================
-        $today = Carbon::today();
-        $warningDays = 90; // 3 bulan
-
         $barangExpired = BarangMasuk::whereNotNull('tanggal_kadaluarsa')
             ->whereDate('tanggal_kadaluarsa', '<=', $today)
             ->count();
 
         $barangHampirExpired = BarangMasuk::whereNotNull('tanggal_kadaluarsa')
-            ->whereDate('tanggal_kadaluarsa', '>', $today)
-            ->whereDate('tanggal_kadaluarsa', '<', $today->copy()->addDays($warningDays))
-            ->count();
+            ->whereBetween('tanggal_kadaluarsa', [
+                $today->copy()->addDay(),
+                $today->copy()->addDays($warningDays)
+            ])->count();
 
+        // =====================
+        // AKTIVITAS TERBARU
+        // =====================
         $aktivitas = collect([
-            ...BarangMasuk::with('product')->latest()->take(3)->get()->map(fn($x) => [
+            ...BarangMasuk::with('product')->latest()->take(3)->get()->map(fn ($x) => [
                 'text' => "Barang masuk: {$x->product->nama_barang}",
                 'tanggal' => $x->created_at
             ]),
-            ...BarangKeluar::with('product')->latest()->take(3)->get()->map(fn($x) => [
+            ...BarangKeluar::with('product')->latest()->take(3)->get()->map(fn ($x) => [
                 'text' => "Barang keluar: {$x->product->nama_barang}",
                 'tanggal' => $x->created_at
             ]),
         ])->sortByDesc('tanggal')->take(5);
 
-
         // =====================
         // STOK KRITIS DETAIL
         // =====================
         $stokKritis = Product::whereRaw(
-            '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id) -
-             (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
-             <= stok_minimal'
+            '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id)
+           - (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
+           <= stok_minimal'
         )->get();
 
         // =====================
-        // DETAIL BARANG EXPIRED
+        // DETAIL EXPIRED
         // =====================
         $expiredItems = BarangMasuk::with('product')
             ->whereNotNull('tanggal_kadaluarsa')
@@ -73,29 +80,27 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // =====================
-        // DETAIL HAMPIR EXPIRED
-        // =====================
         $hampirExpiredItems = BarangMasuk::with('product')
             ->whereNotNull('tanggal_kadaluarsa')
-            ->whereDate('tanggal_kadaluarsa', '>', $today)
-            ->whereDate('tanggal_kadaluarsa', '<=', $today->copy()->addDays($warningDays))
+            ->whereBetween('tanggal_kadaluarsa', [
+                $today->copy()->addDay(),
+                $today->copy()->addDays($warningDays)
+            ])
             ->orderBy('tanggal_kadaluarsa')
             ->take(5)
             ->get();
 
-
         return view('admin.dashboard-admin', compact(
             'totalBarang',
-            'totalMasuk',
-            'totalKeluar',
+            'barangMasukHariIni',
+            'barangKeluarHariIni',
             'stokMenipis',
-            'barangHampirExpired',
             'barangExpired',
+            'barangHampirExpired',
             'aktivitas',
             'stokKritis',
-            'hampirExpiredItems',
             'expiredItems',
+            'hampirExpiredItems'
         ));
     }
 }

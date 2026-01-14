@@ -30,8 +30,8 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body d-flex justify-content-between">
                         <div>
-                            <p class="text-muted mb-1">Barang Masuk</p>
-                            <h4 class="fw-bold">{{ $totalMasuk }}</h4>
+                            <p class="text-muted mb-1">Barang Masuk Hari Ini</p>
+                            <h4 class="fw-bold">{{ $barangMasukHariIni }}</h4>
                         </div>
                         <i class="bi bi-arrow-down-square fs-2 text-success"></i>
                     </div>

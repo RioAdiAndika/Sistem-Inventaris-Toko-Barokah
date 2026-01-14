@@ -58,13 +58,24 @@
 
             <td>{{ $p->nama_barang }}</td>
             <td>{{ $p->kategori }}</td>
-            <td class="fw-bold">{{ $p->stok }}</td>
+            <td>
+                @if ($p->stok_per_satuan->count())
+                    <ul class="mb-0 ps-3">
+                        @foreach ($p->stok_per_satuan as $stok)
+                            <li>{{ $stok->stok }} {{ $stok->satuan }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <span class="text-muted">Stok kosong</span>
+                @endif
+            </td>
+
 
             {{-- 🔥 TOMBOL LIHAT KADALUARSA --}}
             <td class="text-center">
                 <a href="{{ route('products.expired', $p->id) }}"
                    class="btn btn-sm btn-outline-danger">
-                    Lihat Kadaluarsa
+                    Lihat Barang
                 </a>
             </td>
         </tr>

@@ -32,6 +32,28 @@
         <input type="number" name="stok_minimal" class="form-control" value="{{ $product->stok_minimal }}">
     </div>
     <div class="mb-3">
+        <label>Satuan</label>
+        <div class="row">
+            @foreach ($satuans as $satuan)
+                <div class="col-md-3">
+                    <div class="form-check">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            name="satuan_ids[]"
+                            value="{{ $satuan->id }}"
+                            {{ in_array($satuan->id, $selectedSatuans) ? 'checked' : '' }}
+                        >
+                        <label class="form-check-label">
+                            {{ $satuan->nama }}
+                        </label>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <div class="mb-3">
     <label>Gambar Produk</label>
     <input type="file" name="gambar" class="form-control">
 

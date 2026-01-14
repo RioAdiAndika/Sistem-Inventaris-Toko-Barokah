@@ -61,4 +61,5 @@ Route::middleware(['auth', 'role:Admin|Gudang'])->group(function () {
         ->only(['index', 'create', 'store']);
     Route::get('/katalog', [ProductController::class, 'katalog'])->name('products.katalog');
     Route::get('products/{id}/expired', [ProductController::class, 'expired'])->name('products.expired');
+    Route::get('/barang-keluar/batch/{product}',[BarangKeluarController::class, 'getBatchByProduct'])->name('barang-keluar.batch');
 });

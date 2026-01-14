@@ -13,8 +13,8 @@ class BarangMasuk extends Model
 
     protected $fillable = [
         'product_id',
+        'satuan_id',
         'jumlah',
-        'satuan',
         'stok',
         'tanggal',
         'tanggal_kadaluarsa',
@@ -24,8 +24,12 @@ class BarangMasuk extends Model
     {
         return $this->belongsTo(Product::class);
     }
-     public function barangKeluar()
+    public function barangKeluar()
     {
         return $this->hasMany(BarangKeluar::class, 'barang_masuk_id');
+    }
+    public function satuan()
+    {
+        return $this->belongsTo(Satuan::class);
     }
 }

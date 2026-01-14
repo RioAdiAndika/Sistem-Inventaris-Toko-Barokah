@@ -55,7 +55,7 @@
 
         <!-- SIDEBAR -->
         <aside class="sidebar p-3">
-    <h4 class="text-white mb-4">📦 Inventaris</h4>
+    <h4 class="text-white mb-4">Sistem Inventaris </h4>
 
     <ul class="nav nav-pills flex-column gap-1">
         @role('Admin')
