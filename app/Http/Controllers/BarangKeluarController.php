@@ -40,33 +40,54 @@ class BarangKeluarController extends Controller
     // AJAX: BATCH PER PRODUCT
     // =============================
     public function getBatchByProduct(Product $product)
-    {
-        $batches = BarangMasuk::with(['barangKeluar', 'satuan'])
-            ->where('product_id', $product->id)
-            ->orderBy('tanggal_kadaluarsa') // FEFO
-            ->get()
-            ->map(function ($item) {
+{
+    $batches = BarangMasuk::with('barangKeluar', 'satuan')
+        ->where('product_id', $product->id)
+        ->orderBy('tanggal_kadaluarsa')
+        ->get()
+        ->groupBy(function ($item) {
+            $tgl = $item->tanggal_kadaluarsa ?? 'tanpa_kadaluarsa';
+            $satuan = $item->satuan_id ?? 'no_satuan';
+            return $tgl . '_' . $satuan;
+        })
+        ->map(function ($group) {
+            $totalStok = 0;
+            $satuanNama = '';
+            $satuanId = null;
+            $tanggalKadaluarsa = null;
+            $ids = [];
 
+            foreach ($group as $item) {
                 $stokKeluar = $item->barangKeluar->sum('jumlah');
                 $sisa = $item->jumlah - $stokKeluar;
 
-                if ($sisa <= 0) return null;
+                if ($sisa > 0) {
+                    $totalStok += $sisa;
+                    $satuanNama = $item->satuan->nama ?? '';
+                    $satuanId = $item->satuan_id;
+                    $tanggalKadaluarsa = $item->tanggal_kadaluarsa;
+                    $ids[] = $item->id; // simpan semua ID batch yang digabung
+                }
+            }
 
-                return [
-                    'id' => $item->id,
-                    'tanggal_kadaluarsa' => $item->tanggal_kadaluarsa
-                        ? Carbon::parse($item->tanggal_kadaluarsa)->format('d-m-Y')
-                        : 'Tanpa Kadaluarsa',
-                    'stok' => $sisa,
-                    'satuan' => $item->satuan->nama,
-                    'satuan_id' => $item->satuan_id,
-                ];
-            })
-            ->filter()
-            ->values();
+            if ($totalStok <= 0) return null;
 
-        return response()->json($batches);
-    }
+            return [
+                'stok' => $totalStok,
+                'satuan' => $satuanNama,
+                'satuan_id' => $satuanId,
+                'tanggal_kadaluarsa' => $tanggalKadaluarsa
+                    ? Carbon::parse($tanggalKadaluarsa)->format('d-m-Y')
+                    : 'Tanpa Kadaluarsa',
+                'ids' => $ids, // kirim array ID
+            ];
+        })
+        ->filter()
+        ->values();
+
+    return response()->json($batches);
+}
+
 
     // =============================
     // STORE

@@ -29,7 +29,7 @@
                     </td>
 
                     <td class="text-center">
-                        {{ $item->jumlah }} {{ $item->satuan }}
+                        {{ $item->jumlah }} {{ $item->satuan->nama ?? '-' }}
                     </td>
                 </tr>
             @empty

@@ -79,10 +79,10 @@ productSelect.addEventListener('change', function () {
 
             data.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = item.id;
+                // ambil ID pertama sebagai value (atau bisa array jika multiple)
+                opt.value = item.ids[0];
                 opt.dataset.satuan = item.satuan_id;
-                opt.textContent =
-                    `${item.tanggal_kadaluarsa} | Stok: ${item.stok} ${item.satuan}`;
+                opt.textContent = `${item.tanggal_kadaluarsa} | Stok: ${item.stok} ${item.satuan}`;
                 batchSelect.appendChild(opt);
             });
         });

@@ -19,15 +19,9 @@ class DashboardController extends Controller
         // =====================
         $totalBarang = Product::count();
 
-        // 🔥 BARANG MASUK HARI INI
         $barangMasukHariIni = BarangMasuk::whereDate('tanggal', $today)->sum('jumlah');
-
-        // BARANG KELUAR HARI INI
         $barangKeluarHariIni = BarangKeluar::whereDate('tanggal', $today)->sum('jumlah');
 
-        // =====================
-        // STOK MENIPIS
-        // =====================
         $stokMenipis = Product::whereRaw(
             '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id)
            - (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
@@ -48,17 +42,33 @@ class DashboardController extends Controller
             ])->count();
 
         // =====================
-        // AKTIVITAS TERBARU
+        // AKTIVITAS HARI INI
         // =====================
-        $aktivitas = collect([
-            ...BarangMasuk::with('product')->latest()->take(3)->get()->map(fn ($x) => [
-                'text' => "Barang masuk: {$x->product->nama_barang}",
-                'tanggal' => $x->created_at
-            ]),
-            ...BarangKeluar::with('product')->latest()->take(3)->get()->map(fn ($x) => [
-                'text' => "Barang keluar: {$x->product->nama_barang}",
-                'tanggal' => $x->created_at
-            ]),
+        $aktivitasHariIni = collect([
+            ...BarangMasuk::with('product', 'satuan')
+                ->whereDate('tanggal', $today)
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function ($x) {
+                    $satuan = $x->satuan?->nama ?? '';
+                    return [
+                        'text' => "Barang masuk: {$x->product->nama_barang} {$x->jumlah} {$satuan}",
+                        'tanggal' => $x->created_at
+                    ];
+                }),
+            ...BarangKeluar::with('product', 'satuan')
+                ->whereDate('tanggal', $today)
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function ($x) {
+                    $satuan = $x->satuan?->nama ?? '';
+                    return [
+                        'text' => "Barang keluar: {$x->product->nama_barang} {$x->jumlah} {$satuan}",
+                        'tanggal' => $x->created_at
+                    ];
+                }),
         ])->sortByDesc('tanggal')->take(5);
 
         // =====================
@@ -73,14 +83,14 @@ class DashboardController extends Controller
         // =====================
         // DETAIL EXPIRED
         // =====================
-        $expiredItems = BarangMasuk::with('product')
+        $expiredItems = BarangMasuk::with('product.satuans')
             ->whereNotNull('tanggal_kadaluarsa')
             ->whereDate('tanggal_kadaluarsa', '<=', $today)
             ->orderBy('tanggal_kadaluarsa')
             ->take(5)
             ->get();
 
-        $hampirExpiredItems = BarangMasuk::with('product')
+        $hampirExpiredItems = BarangMasuk::with('product.satuans')
             ->whereNotNull('tanggal_kadaluarsa')
             ->whereBetween('tanggal_kadaluarsa', [
                 $today->copy()->addDay(),
@@ -97,7 +107,7 @@ class DashboardController extends Controller
             'stokMenipis',
             'barangExpired',
             'barangHampirExpired',
-            'aktivitas',
+            'aktivitasHariIni',
             'stokKritis',
             'expiredItems',
             'hampirExpiredItems'
