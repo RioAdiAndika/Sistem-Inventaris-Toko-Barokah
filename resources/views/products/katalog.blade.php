@@ -4,7 +4,7 @@
 <h4>Katalog Produk</h4>
 
 <div class="card mb-3 p-3">
-    <form method="GET" class="row g-3 align-items-center">
+    <form method="GET" class="row g-3 align-items-center ">
         <div class="col-auto">
             <input type="text" name="search" class="form-control"
                    placeholder="Cari nama produk..."
@@ -74,7 +74,7 @@
             {{-- 🔥 TOMBOL LIHAT KADALUARSA --}}
             <td class="text-center">
                 <a href="{{ route('products.expired', $p->id) }}"
-                   class="btn btn-sm btn-outline-danger">
+                   class="btn btn-sm btn-primary">
                     Lihat Barang
                 </a>
             </td>

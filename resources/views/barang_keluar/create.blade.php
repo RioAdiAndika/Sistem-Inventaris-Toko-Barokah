@@ -48,7 +48,7 @@
                    value="{{ date('Y-m-d') }}" required>
         </div>
 
-        <button class="btn btn-danger">Simpan</button>
+        <button class="btn btn-primary">Simpan</button>
         <a href="{{ route('barang-keluar.index') }}" class="btn btn-secondary">Kembali</a>
     </form>
 </div>

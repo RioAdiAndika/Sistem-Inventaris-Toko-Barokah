@@ -5,7 +5,7 @@
 
     <div class="d-flex justify-content-between mb-3">
         <h4>📤 Data Barang Keluar</h4>
-        <a href="{{ route('barang-keluar.create') }}" class="btn btn-danger">
+        <a href="{{ route('barang-keluar.create') }}" class="btn btn-primary">
             + Tambah Barang Keluar
         </a>
     </div>

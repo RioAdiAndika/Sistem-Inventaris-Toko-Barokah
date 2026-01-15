@@ -45,7 +45,7 @@
             <input type="date" name="tanggal" class="form-control" value="{{ date('Y-m-d') }}" required>
         </div>
 
-        <button class="btn btn-success">Simpan</button>
+        <button class="btn btn-primary">Simpan</button>
         <a href="{{ route('barang-masuk.index') }}" class="btn btn-secondary">Kembali</a>
     </form>
     <script>
