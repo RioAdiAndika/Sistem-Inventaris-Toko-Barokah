@@ -10,10 +10,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     <table class="table table-bordered align-middle">
         <thead class="table-light text-center">
             <tr>

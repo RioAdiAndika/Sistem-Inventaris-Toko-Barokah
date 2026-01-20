@@ -213,7 +213,6 @@ class ProductController extends Controller
             'Obat-Obatan',
             'Air Minum',
             'Sabun & Deterjen',
-            'Lain-lain'
         ];
     }
     public function expired($id)

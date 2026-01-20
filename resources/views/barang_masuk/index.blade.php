@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<h4 class="mb-3">📥 Barang Masuk</h4>
-
-<a href="{{ route('barang-masuk.create') }}" class="btn btn-primary mb-3">
-    + Tambah Barang Masuk
-</a>
+<div class="d-flex justify-content-between mb-3">
+    <h4>📥 Data Barang Masuk</h4>
+    <a href="{{ route('barang-masuk.create') }}" class="btn btn-primary">
+        + Tambah Barang Masuk
+    </a>
+</div>
 
 <table class="table table-bordered align-middle">
     <thead class="table-light">

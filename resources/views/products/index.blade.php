@@ -8,16 +8,6 @@
     </a>
 </div>
 
-{{-- ALERT SUCCESS --}}
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-
-{{-- ALERT ERROR --}}
-@if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
-
 <table class="table table-bordered align-middle">
     <thead class="table-light text-center">
         <tr>
