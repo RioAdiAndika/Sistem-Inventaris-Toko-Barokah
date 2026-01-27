@@ -2,11 +2,6 @@
 
 @section('content')
     <h4 class="mb-3">Tambah Barang Masuk</h4>
-    @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
     <form action="{{ route('barang-masuk.store') }}" method="POST">
         @csrf
 

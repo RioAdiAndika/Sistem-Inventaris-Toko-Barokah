@@ -9,11 +9,11 @@ class Product extends Model
     protected $fillable = [
         'kode_barang',
         'nama_barang',
-        'gambar',
         'kategori',
         'stok',
-        'stok_minimal'
-
+        'stok_minimal',
+        'stok_minimal_satuan_id',
+        'gambar'
     ];
     public function barangMasuk()
     {
@@ -29,6 +29,10 @@ class Product extends Model
 {
     return $this->belongsToMany(Satuan::class, 'product_satuan');
 
+}
+public function stokMinimalSatuan()
+{
+    return $this->belongsTo(Satuan::class, 'stok_minimal_satuan_id');
 }
 
     // ✅ stok otomatis

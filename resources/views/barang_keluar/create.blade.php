@@ -3,17 +3,6 @@
 @section('content')
 <div class="container">
     <h4 class="mb-3">📤 Tambah Barang Keluar</h4>
-
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <form action="{{ route('barang-keluar.store') }}" method="POST">
         @csrf
 
@@ -80,7 +69,7 @@ productSelect.addEventListener('change', function () {
             data.forEach(item => {
                 const opt = document.createElement('option');
                 // ambil ID pertama sebagai value (atau bisa array jika multiple)
-                opt.value = item.ids[0];
+                opt.value = item.ids.join(','); // ✅ kirim semua batch
                 opt.dataset.satuan = item.satuan_id;
                 opt.textContent = `${item.tanggal_kadaluarsa} | Stok: ${item.stok} ${item.satuan}`;
                 batchSelect.appendChild(opt);

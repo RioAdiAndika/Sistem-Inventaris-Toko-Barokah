@@ -92,53 +92,68 @@ class BarangKeluarController extends Controller
     // =============================
     // STORE
     // =============================
-    public function store(Request $request)
-    {
-        $request->validate([
-            'product_id'        => 'required|exists:products,id',
-            'barang_masuk_id'   => 'required|exists:barang_masuk,id',
-            'satuan_id'         => 'required|exists:satuans,id',
-            'jumlah'            => 'required|integer|min:1',
-            'tanggal'           => 'required|date',
-        ]);
+   public function store(Request $request)
+{
+    try {
 
-        try {
-            DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($request) {
 
-                $batch = BarangMasuk::with('barangKeluar')
-                    ->lockForUpdate()
-                    ->findOrFail($request->barang_masuk_id);
+            $batchIds = explode(',', $request->barang_masuk_id);
 
-                if ($batch->satuan_id != $request->satuan_id) {
-                    throw new \Exception('Satuan tidak sesuai dengan batch');
-                }
+            $batches = BarangMasuk::with('barangKeluar')
+                ->whereIn('id', $batchIds)
+                ->orderBy('tanggal_kadaluarsa')
+                ->lockForUpdate()
+                ->get();
 
-                $stokKeluar   = $batch->barangKeluar->sum('jumlah');
-                $stokTersedia = $batch->jumlah - $stokKeluar;
+            $totalStok = 0;
 
-                if ($request->jumlah > $stokTersedia) {
-                    throw new \Exception(
-                        'Stok tidak mencukupi. Sisa stok: ' . $stokTersedia
-                    );
-                }
+            foreach ($batches as $batch) {
+                $stokKeluar = $batch->barangKeluar->sum('jumlah');
+                $totalStok += ($batch->jumlah - $stokKeluar);
+            }
+
+            if ($request->jumlah > $totalStok) {
+                throw new \Exception(
+                    'Stok tidak mencukupi. Sisa stok: ' . $totalStok
+                );
+            }
+
+            $sisa = $request->jumlah;
+
+            foreach ($batches as $batch) {
+                if ($sisa <= 0) break;
+
+                $stokKeluar = $batch->barangKeluar->sum('jumlah');
+                $tersedia = $batch->jumlah - $stokKeluar;
+
+                if ($tersedia <= 0) continue;
+
+                $ambil = min($tersedia, $sisa);
 
                 BarangKeluar::create([
                     'product_id'      => $request->product_id,
                     'barang_masuk_id' => $batch->id,
                     'satuan_id'       => $request->satuan_id,
-                    'jumlah'          => $request->jumlah,
+                    'jumlah'          => $ambil,
                     'tanggal'         => $request->tanggal,
                 ]);
-            });
 
-            return redirect()
-                ->route('barang-keluar.index')
-                ->with('success', 'Barang berhasil dikeluarkan');
+                $sisa -= $ambil;
+            }
+        });
 
-        } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', $e->getMessage());
-        }
+        // ✅ SUKSES → PINDAH KE INDEX
+        return redirect()
+            ->route('barang-keluar.index')
+            ->with('success', 'Barang keluar berhasil disimpan');
+
+    } catch (\Exception $e) {
+
+        // ❌ GAGAL → KEMBALI KE FORM
+        return back()
+            ->withErrors($e->getMessage())
+            ->withInput();
     }
+}
 }

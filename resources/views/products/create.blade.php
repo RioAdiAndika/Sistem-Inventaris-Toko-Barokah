@@ -80,6 +80,27 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Satuan Stok Minimal</label>
+
+            <select name="stok_minimal_satuan_id"
+                id="stok_minimal_satuan_id"
+                class="form-select @error('stok_minimal_satuan_id') is-invalid @enderror"
+                disabled>
+
+                <option value="">-- Pilih Satuan Minimal --</option>
+
+                @foreach ($satuans as $satuan)
+                    <option value="{{ $satuan->id }}">
+                        {{ $satuan->nama }}
+                    </option>
+                @endforeach
+            </select>
+
+            @error('stok_minimal_satuan_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
         <div class="mb-3">
             <label class="form-label">Gambar Produk</label>
@@ -95,4 +116,32 @@
             💾 Simpan
         </button>
     </form>
+    <script>
+    const checkboxes = document.querySelectorAll('input[name="satuan_ids[]"]');
+    const satuanSelect = document.getElementById('stok_minimal_satuan_id');
+
+    function updateSatuanMinimal() {
+        const checked = [...checkboxes].filter(cb => cb.checked);
+
+        satuanSelect.innerHTML = '<option value="">-- Pilih Satuan Minimal --</option>';
+
+        if (checked.length === 0) {
+            satuanSelect.disabled = true;
+            return;
+        }
+
+        satuanSelect.disabled = false;
+
+        checked.forEach(cb => {
+            const label = cb.closest('.form-check').querySelector('label').innerText;
+            const opt = document.createElement('option');
+            opt.value = cb.value;
+            opt.textContent = label;
+            satuanSelect.appendChild(opt);
+        });
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', updateSatuanMinimal));
+</script>
+
 @endsection

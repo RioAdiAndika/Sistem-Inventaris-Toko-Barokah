@@ -22,11 +22,25 @@ class DashboardController extends Controller
         $barangMasukHariIni = BarangMasuk::whereDate('tanggal', $today)->sum('jumlah');
         $barangKeluarHariIni = BarangKeluar::whereDate('tanggal', $today)->sum('jumlah');
 
-        $stokMenipis = Product::whereRaw(
-            '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id)
-           - (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
-           <= stok_minimal'
-        )->count();
+        $stokMenipis = Product::whereNotNull('stok_minimal_satuan_id')
+    ->whereRaw("
+        (
+            SELECT COALESCE(SUM(bm.jumlah),0)
+            FROM barang_masuk bm
+            WHERE bm.product_id = products.id
+            AND bm.satuan_id = products.stok_minimal_satuan_id
+        )
+        -
+        (
+            SELECT COALESCE(SUM(bk.jumlah),0)
+            FROM barang_keluar bk
+            WHERE bk.product_id = products.id
+            AND bk.satuan_id = products.stok_minimal_satuan_id
+        )
+        <= products.stok_minimal
+    ")
+    ->count();
+
 
         // =====================
         // EXPIRED
@@ -74,11 +88,46 @@ class DashboardController extends Controller
         // =====================
         // STOK KRITIS DETAIL
         // =====================
-        $stokKritis = Product::whereRaw(
-            '(SELECT COALESCE(SUM(jumlah),0) FROM barang_masuk WHERE product_id = products.id)
-           - (SELECT COALESCE(SUM(jumlah),0) FROM barang_keluar WHERE product_id = products.id)
-           <= stok_minimal'
-        )->get();
+        $stokKritis = Product::select(
+        'products.*',
+        'satuans.nama as stok_satuan'
+    )
+    ->selectRaw("
+        (
+            SELECT COALESCE(SUM(bm.jumlah),0)
+            FROM barang_masuk bm
+            WHERE bm.product_id = products.id
+            AND bm.satuan_id = products.stok_minimal_satuan_id
+        )
+        -
+        (
+            SELECT COALESCE(SUM(bk.jumlah),0)
+            FROM barang_keluar bk
+            WHERE bk.product_id = products.id
+            AND bk.satuan_id = products.stok_minimal_satuan_id
+        ) AS stok_aktual
+    ")
+    ->leftJoin('satuans', 'satuans.id', '=', 'products.stok_minimal_satuan_id')
+    ->whereNotNull('products.stok_minimal_satuan_id')
+    ->whereRaw("
+        (
+            SELECT COALESCE(SUM(bm.jumlah),0)
+            FROM barang_masuk bm
+            WHERE bm.product_id = products.id
+            AND bm.satuan_id = products.stok_minimal_satuan_id
+        )
+        -
+        (
+            SELECT COALESCE(SUM(bk.jumlah),0)
+            FROM barang_keluar bk
+            WHERE bk.product_id = products.id
+            AND bk.satuan_id = products.stok_minimal_satuan_id
+        )
+        <= products.stok_minimal
+    ")
+    ->get();
+
+
 
         // =====================
         // DETAIL EXPIRED

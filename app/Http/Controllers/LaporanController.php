@@ -20,7 +20,8 @@ class LaporanController extends Controller
         ];
 
         // ================= FILTER PRODUK =================
-        $productsQuery = Product::with('satuans');
+        $productsQuery = Product::with(['satuans', 'stokMinimalSatuan']);
+
 
         if ($request->kategori) {
             $productsQuery->where('kategori', $request->kategori);
@@ -91,7 +92,8 @@ class LaporanController extends Controller
     {
         $filename = 'laporan_inventaris_' . date('Ymd_His') . '.csv';
 
-        $productsQuery = Product::with('satuans');
+        $productsQuery = Product::with(['satuans', 'stokMinimalSatuan']);
+
 
         if ($request->kategori) {
             $productsQuery->where('kategori', $request->kategori);
@@ -202,7 +204,7 @@ class LaporanController extends Controller
     // ================= EXPORT PDF =================
     public function exportPdf(Request $request)
     {
-        $productsQuery = Product::with('satuans');
+        $productsQuery = Product::with(['satuans', 'stokMinimalSatuan']);
 
         if ($request->kategori) {
             $productsQuery->where('kategori', $request->kategori);

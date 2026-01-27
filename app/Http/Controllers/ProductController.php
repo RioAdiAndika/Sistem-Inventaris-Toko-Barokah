@@ -80,7 +80,8 @@ class ProductController extends Controller
             'kode_barang',
             'nama_barang',
             'kategori',
-            'stok_minimal'
+            'stok_minimal',
+            'stok_minimal_satuan_id'
         ]);
 
         if ($request->hasFile('gambar')) {
@@ -124,28 +125,30 @@ class ProductController extends Controller
     /* =========================
      * UPDATE PRODUK
      * ========================= */
-    public function update(Request $request, Product $product)
+   public function update(Request $request, Product $product)
 {
     $request->validate([
-        'kode_barang'  => 'required|unique:products,kode_barang,' . $product->id,
-        'nama_barang'  => 'required',
-        'kategori'     => 'required',
-        'stok_minimal' => 'required|integer|min:0',
-        'satuan_ids'   => 'required|array|min:1',
-        'satuan_ids.*' => 'exists:satuans,id',
-        'gambar'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'kode_barang'            => 'required|unique:products,kode_barang,' . $product->id,
+        'nama_barang'            => 'required',
+        'kategori'               => 'required',
+        'stok_minimal'           => 'required|integer|min:0',
+        'stok_minimal_satuan_id' => 'required|exists:satuans,id',
+        'satuan_ids'             => 'required|array|min:1',
+        'satuan_ids.*'           => 'exists:satuans,id',
+        'gambar'                 => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
     $data = $request->only([
         'kode_barang',
         'nama_barang',
         'kategori',
-        'stok_minimal'
+        'stok_minimal',
+        'stok_minimal_satuan_id', // 🔥 WAJIB
     ]);
 
     if ($request->hasFile('gambar')) {
-        if ($product->gambar && Storage::disk('public')->exists('products/' . $product->gambar)) {
-            Storage::disk('public')->delete('products/' . $product->gambar);
+        if ($product->gambar && Storage::disk('public')->exists('products/'.$product->gambar)) {
+            Storage::disk('public')->delete('products/'.$product->gambar);
         }
 
         $file = $request->file('gambar');
@@ -157,14 +160,13 @@ class ProductController extends Controller
     // update produk
     $product->update($data);
 
-    // 🔥 update relasi satuan
+    // update relasi satuan
     $product->satuans()->sync($request->satuan_ids);
 
     return redirect()
         ->route('products.index')
         ->with('success', 'Produk berhasil diperbarui');
 }
-
 
     /* =========================
      * HAPUS PRODUK

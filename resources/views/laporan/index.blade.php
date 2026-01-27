@@ -63,7 +63,13 @@
                                 {{ $sd['stok'] }} {{ $sd['satuan'] }}<br>
                             @endforeach
                         </td>
-                        <td>{{ $p->stok_minimal }}</td>
+                        <td>
+                            @if($p->stok_minimal && $p->stokMinimalSatuan)
+                                {{ $p->stok_minimal }} {{ $p->stokMinimalSatuan->nama }}
+                            @else
+                                -
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
