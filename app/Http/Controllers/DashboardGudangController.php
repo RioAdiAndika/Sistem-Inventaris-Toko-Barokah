@@ -72,7 +72,7 @@ class DashboardGudangController extends Controller
             ->take(5)
             ->get();
 
-        return view('gudang.dashboard-gudang', compact(
+        return view('Gudang.dashboard-gudang', compact(
             'totalBarang',
             'totalMasuk',
             'totalKeluar',
